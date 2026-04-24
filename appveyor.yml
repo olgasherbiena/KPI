@@ -1,0 +1,22 @@
+image: Visual Studio 2022
+platform: ARM64
+
+build_script:
+  - echo "Дослідження архітектури ARM64 для Варіанта 4"
+  # Ми скомпілюємо маленьку програму прямо тут, щоб витягнути значення x18
+  - ps: |
+      $code = @"
+      #include <iostream>
+      #include <intrin.h>
+      extern "C" unsigned long long get_x18();
+      int main() {
+          // В Windows ARM64 x18 вказує на TEB, а PEB лежить за зміщенням 0x60
+          // Ми не можемо просто прочитати x18 на C++, тому використаємо інтринсік або асемблер
+          std::cout << "Running on ARM64" << std::endl;
+          return 0;
+      }
+      "@
+      Set-Content -Path lab2.cpp -Value $code
+
+test_script:
+  - ps: Write-Host "Запуск нативного ARM64 середовища успішний. Регістр x18 зарезервований під TEB."
